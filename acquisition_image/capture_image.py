@@ -3,12 +3,13 @@ import cv2
 from IHM.deuxième_page import ImageReviewPage
 
 
+
 class ImageCapture:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
         self.label_captured = False
         self.product_captured = False
-        self.image_folder="/Users/thomaseude/Desktop/ICAM/I5/MSI/GROUPE SEB/ProjetSeb_v2/acquisition_image"
+        self.image_folder="acquisition_image"
 
     def capture_etiquette(self):
         # Capture de l'image d'étiquette

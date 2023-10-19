@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtGui import QImage
-from traitement_image.binarisation import binarize_image
+from traitement_image.binarisation import ImageProcessor
 import os
 from PIL import Image
 
@@ -71,42 +71,46 @@ class ImageReviewPage(QDialog):
         image1_path = "acquisition_image/image_etiquette.png"
         image2_path = "acquisition_image/image_produit.png"
 
-        binary_image1 = binarize_image(image1_path)
-        binary_image2 = binarize_image(image2_path)
+        image_processor = ImageProcessor()
 
-        # Convertissez les images binaires de type numpy.ndarray en QImage
-        binary_qimage1 = QImage(binary_image1.data, binary_image1.shape[1], binary_image1.shape[0],
-                                binary_image1.shape[1], QImage.Format.Format_Grayscale8)
-        binary_qimage2 = QImage(binary_image2.data, binary_image2.shape[1], binary_image2.shape[0],
-                                binary_image2.shape[1], QImage.Format.Format_Grayscale8)
+        binary_image1 = image_processor.binarize_image(image1_path)
+        binary_image2 = image_processor.binarize_image(image2_path)
+
+        cleaned_binary_image1 = image_processor.remove_noise_from_binary_image(binary_image1)
+        cleaned_binary_image2 = image_processor.remove_noise_from_binary_image(binary_image2)
+
+        image_label_pairs = [(cleaned_binary_image1, self.label1),
+                             (cleaned_binary_image2, self.label2)]
 
         # Redimensionnez les images binaires pour qu'elles soient visibles
         max_width = 600  # Largeur maximale souhaitée
         max_height = 300  # Hauteur maximale souhaitée
 
-        # Redimensionnez la première image
-        scaled_width1 = min(binary_qimage1.width(), max_width)
-        scaled_height1 = min(binary_qimage1.height(), max_height)
-        binary_qimage1 = binary_qimage1.scaled(scaled_width1, scaled_height1)
+        # Convertissez les images binaires de type numpy.ndarray en QImage
+        for binary_image, label in image_label_pairs:
+            # Convertissez les images binaires en QImage
+            binary_qimage = QImage(binary_image.data, binary_image.shape[1], binary_image.shape[0],
+                                   binary_image.shape[1], QImage.Format.Format_Grayscale8)
 
-        # Redimensionnez la deuxième image
-        scaled_width2 = min(binary_qimage2.width(), max_width)
-        scaled_height2 = min(binary_qimage2.height(), max_height)
-        binary_qimage2 = binary_qimage2.scaled(scaled_width2, scaled_height2)
 
-        # Créez des QPixmap à partir des images binaires redimensionnées
-        binary_pixmap1 = QPixmap.fromImage(binary_qimage1)
-        binary_pixmap2 = QPixmap.fromImage(binary_qimage2)
+            scaled_width = min(binary_qimage.width(), max_width)
+            scaled_height = min(binary_qimage.height(), max_height)
+            binary_qimage = binary_qimage.scaled(scaled_width, scaled_height)
 
-        # Mettez à jour les QLabel avec les images binaires redimensionnées
-        self.label1.setPixmap(binary_pixmap1)
-        self.label2.setPixmap(binary_pixmap2)
 
-        # Obtenez les chemins de fichiers pour enregistrer les images binaires
-        output_image1_path = os.path.splitext(image1_path)[0] + "_binaire.png"
-        output_image2_path = os.path.splitext(image2_path)[0] + "_binaire.png"
+            # Créez des QPixmap à partir des images binaires redimensionnées
+            binary_pixmap = QPixmap.fromImage(binary_qimage)
 
-        # Enregistrez les images binaires dans le même dossier que les images initiales
-        binary_pixmap1.toImage().save(output_image1_path)
-        binary_pixmap2.toImage().save(output_image2_path)
+            # Mettez à jour les QLabel avec les images binaires redimensionnées
+            label.setPixmap(binary_pixmap)
+
+            # Obtenez le chemin de fichier pour enregistrer l'image binaire en fonction de l'étiquette
+            if label == self.label1:
+                original_image_path = "acquisition_image/image_etiquette.png"
+            else:
+                original_image_path = "acquisition_image/image_produit.png"
+            output_image_path = os.path.splitext(original_image_path)[0] + "_binaire.png"
+
+            # Enregistrez les images binaires dans le même dossier que les images initiales
+            binary_pixmap.toImage().save(output_image_path)
         
