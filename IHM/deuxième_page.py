@@ -76,15 +76,15 @@ class ImageReviewPage(QDialog):
         binary_image1 = image_processor.binarize_image(image1_path)
         binary_image2 = image_processor.binarize_image(image2_path)
 
-        cleaned_binary_image1 = image_processor.remove_noise_from_binary_image(binary_image1)
-        cleaned_binary_image2 = image_processor.remove_noise_from_binary_image(binary_image2)
+        cleaned_binary_image1 = image_processor.remove_noise(binary_image1)
+        cleaned_binary_image2 = image_processor.remove_noise(binary_image2)
 
         image_label_pairs = [(cleaned_binary_image1, self.label1),
                              (cleaned_binary_image2, self.label2)]
 
         # Redimensionnez les images binaires pour qu'elles soient visibles
-        max_width = 600  # Largeur maximale souhaitée
-        max_height = 300  # Hauteur maximale souhaitée
+        max_width = 650  # Largeur maximale souhaitée
+        max_height = 450  # Hauteur maximale souhaitée
 
         # Convertissez les images binaires de type numpy.ndarray en QImage
         for binary_image, label in image_label_pairs:

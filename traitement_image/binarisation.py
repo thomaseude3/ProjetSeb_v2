@@ -6,7 +6,7 @@ class ImageProcessor:
         _, binary_image = cv2.threshold(gray_image, 128, 255, cv2.THRESH_BINARY)
         return binary_image
 
-    def remove_noise_from_binary_image(self, binary_image, kernel_size=3):
+    def remove_noise(self, binary_image, kernel_size=3):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
         cleaned_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
         return cleaned_image
