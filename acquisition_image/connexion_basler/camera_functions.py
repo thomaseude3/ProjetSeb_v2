@@ -21,7 +21,7 @@ import time
 from pypylon import pylon 
 import os.path
 import os
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 from pathlib import Path
 
 

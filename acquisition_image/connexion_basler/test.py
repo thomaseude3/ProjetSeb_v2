@@ -8,7 +8,7 @@ camera.Attach(tl_factory.CreateFirstDevice())
 
 camera.Open()
 camera.StartGrabbing(1)
-camera.ExposureTimeAbs.SetValue(900000)
+camera.ExposureTimeAbs.SetValue(2000)
 
 grab = camera.RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
 if grab.GrabSucceeded():
