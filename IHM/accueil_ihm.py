@@ -47,7 +47,8 @@ class ImageCaptureApp(QWidget):
         else:
             self.timer_label.stop()
             self.capture_label_button.setText("Autre prise d'image")
-            self.capture_label()
+            self.image_capture.basler_etiquette()
+            """self.capture_label()"""
 
     def update_countdown_product(self):
         if self.countdown_product > 0:
@@ -56,7 +57,8 @@ class ImageCaptureApp(QWidget):
         else:
             self.timer_product.stop()
             self.capture_product_button.setText("Autre prise d'image")
-            self.capture_product()
+            self.image_capture.basler_produit()
+            """self.capture_product()"""
 
     def capture_label(self):
         self.image_capture.capture_etiquette()

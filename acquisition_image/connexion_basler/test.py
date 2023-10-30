@@ -1,5 +1,4 @@
 from pypylon import pylon
-import matplotlib.pyplot as plt
 import cv2  # Importez OpenCV
 
 tl_factory = pylon.TlFactory.GetInstance()

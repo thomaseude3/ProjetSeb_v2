@@ -10,8 +10,12 @@ class ImageReviewPage(QDialog):
     def __init__(self, image1_path, image2_path):
         super().__init__()
 
-        image1_path = "acquisition_image/image_etiquette.png"
-        image2_path = "acquisition_image/image_produit.png"
+        image1_path="acquisition_image/etiquette_basler.png"
+        image2_path="acquisition_image/produit_basler.png"
+
+
+        #image1_path = "acquisition_image/image_etiquette.png"
+        #image2_path = "acquisition_image/image_produit.png"
 
         self.setGeometry(100,100,1200,600)
         self.setWindowTitle("Examen des images")
@@ -48,7 +52,7 @@ class ImageReviewPage(QDialog):
 
         self.setLayout(layout)
 
-        accept_button.clicked.connect(self.binarize_images)
+        accept_button.clicked.connect(self.traitement_images)
 
         # Utilisez le signal showEvent pour obtenir la taille de la fenêtre une fois affichée
         self.showEvent = self.on_show
@@ -66,10 +70,13 @@ class ImageReviewPage(QDialog):
         self.label1.setPixmap(scaled_pixmap1)
         self.label2.setPixmap(scaled_pixmap2)
 
-    def binarize_images(self):
+    def traitement_images(self):
 
-        image1_path = "acquisition_image/image_etiquette.png"
-        image2_path = "acquisition_image/image_produit.png"
+        #image1_path = "acquisition_image/image_etiquette.png"
+        #image2_path = "acquisition_image/image_produit.png"
+
+        image1_path = "acquisition_image/etiquette_basler.png"
+        image2_path = "acquisition_image/produit_basler.png"
 
         image_processor = ImageProcessor()
 
@@ -104,12 +111,12 @@ class ImageReviewPage(QDialog):
             # Mettez à jour les QLabel avec les images binaires redimensionnées
             label.setPixmap(binary_pixmap)
 
-            # Obtenez le chemin de fichier pour enregistrer l'image binaire en fonction de l'étiquette
+            # Obtenez le chemin de fichier pour enregistrer l'image binaire
             if label == self.label1:
                 original_image_path = "acquisition_image/image_etiquette.png"
             else:
                 original_image_path = "acquisition_image/image_produit.png"
-            output_image_path = os.path.splitext(original_image_path)[0] + "_binaire.png"
+            output_image_path = os.path.splitext(original_image_path)[0] + "_binarized.png"
 
             # Enregistrez les images binaires dans le même dossier que les images initiales
             binary_pixmap.toImage().save(output_image_path)

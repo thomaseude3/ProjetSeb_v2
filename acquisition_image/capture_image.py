@@ -1,5 +1,6 @@
 import os.path
 import cv2
+from pypylon import pylon
 from IHM.deuxième_page import ImageReviewPage
 
 
@@ -42,3 +43,58 @@ class ImageCapture:
     def show_image_review_page(self, image1, image2):
         review_page = ImageReviewPage(image1, image2)
         review_page.exec()
+
+    def basler_etiquette(self):
+        tl_factory = pylon.TlFactory.GetInstance()
+        camera = pylon.InstantCamera()
+        camera.Attach(tl_factory.CreateFirstDevice())
+
+        camera.Open()
+        camera.StartGrabbing(1)
+        camera.ExposureTimeAbs.SetValue(2000)
+
+        grab = camera.RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+
+        if grab.GrabSucceeded():
+            print('Grab succeeded')
+            image = grab.Array
+
+            # Enregistrez l'image sous format PNG en utilisant OpenCV
+            image_path = os.path.join(self.image_folder, "etiquette_basler.png")
+            cv2.imwrite(image_path, image)
+
+            self.label_captured = True
+
+        if self.label_captured and self.product_captured:
+            self.show_image_review_page("etiquette_basler.png", "produit_basler.png")
+
+
+        grab.Release()
+        camera.Close()
+
+    def basler_produit(self):
+        tl_factory = pylon.TlFactory.GetInstance()
+        camera = pylon.InstantCamera()
+        camera.Attach(tl_factory.CreateFirstDevice())
+
+        camera.Open()
+        camera.StartGrabbing(1)
+        camera.ExposureTimeAbs.SetValue(2000)
+
+        grab = camera.RetrieveResult(1000, pylon.TimeoutHandling_ThrowException)
+
+        if grab.GrabSucceeded():
+            print('Grab succeeded')
+            image = grab.Array
+
+            # Enregistrez l'image sous format PNG en utilisant OpenCV
+            image_path = os.path.join(self.image_folder, "produit_basler.png")
+            cv2.imwrite(image_path, image)
+
+            self.product_captured = True
+
+        if self.label_captured and self.product_captured:
+            self.show_image_review_page("etiquette_basler.png", "produit_basler.png")
+
+        grab.Release()
+        camera.Close()
