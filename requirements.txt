@@ -43,3 +43,5 @@ torchaudio==2.0.2
 torchvision==0.15.2
 typing_extensions==4.8.0
 urllib3==2.0.6
+
+fuzzywuzzy~=0.18.0

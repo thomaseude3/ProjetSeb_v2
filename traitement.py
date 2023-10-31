@@ -1,7 +1,5 @@
 import cv2
 import os
-
-
 class traitement_etiquette:
     @staticmethod
     def enregistrer_image(image, nom_fichier):

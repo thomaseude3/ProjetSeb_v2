@@ -11,7 +11,7 @@ class ImageCapture:
         self.product_captured = False
         self.image_folder = "acquisition_image"
 
-    def capture_etiquette(self):
+    '''def capture_etiquette(self):
         # Capture de l'image d'étiquette
         ret, frame = self.cap.read()
         if ret:
@@ -36,7 +36,7 @@ class ImageCapture:
 
         # Vérifier si les deux images ont été capturées
         if self.label_captured and self.product_captured:
-            self.show_image_review_page("image_etiquette.png", "image_produit.png")
+            self.show_image_review_page("image_etiquette.png", "image_produit.png")'''
 
     def show_image_review_page(self, image1, image2):
         review_page = ImageReviewPage(image1, image2)

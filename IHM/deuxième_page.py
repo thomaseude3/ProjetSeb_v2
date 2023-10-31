@@ -3,9 +3,13 @@ from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayo
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtGui import QImage
 from traitement import traitement_etiquette, traitement_produit
+from ocr import ocr
 import os
 from PIL import Image
 import cv2
+import pytesseract
+from fuzzywuzzy import fuzz, process
+import re
 
 
 class ImageReviewPage(QDialog):
@@ -53,7 +57,7 @@ class ImageReviewPage(QDialog):
 
         self.setLayout(layout)
 
-        accept_button.clicked.connect(self.traitement_images)
+        accept_button.clicked.connect(self.traitement_plus_ocm)
 
         # Utilisez le signal showEvent pour obtenir la taille de la fenêtre une fois affichée
         self.showEvent = self.on_show
@@ -97,50 +101,53 @@ class ImageReviewPage(QDialog):
         traitement_etiquette_instance.enregistrer_image(binary_image1, 'etiquette_basler_binarisee.png')
         traitement_etiquette_instance.enregistrer_image(binary_image2, 'produit_basler_binarise.png')
 
+    def ocr(self):
+        image_produit = cv2.imread("acquisition_image/produit_basler_binarise.png")
+        image_etiquette = cv2.imread("acquisition_image/etiquette_basler_binarisee.png")
 
+        texte_produit = pytesseract.image_to_string(image_produit)
+        texte_etiquette = pytesseract.image_to_string(image_etiquette)
 
+        mots_correspondants, scores = ocr.comparer_mots(texte_produit, texte_etiquette)
 
+        print("Texte extrait de l'image du produit :")
+        print(texte_produit)
+        print("\nTexte extrait de l'image de l'étiquette :")
+        print(texte_etiquette)
 
-        '''image_label_pairs = [(cleaned_binary_image1, self.label1),
-                             (cleaned_binary_image2, self.label2)]
+        # Localiser les positions des mots non correspondants dans l'image du produit
+        positions_mots = ocr.localiser_positions_mots(image_produit, ocr.extraire_mots_et_chiffres(texte_produit))
 
-        # Redimensionnez les images binaires pour qu'elles soient visibles
-        max_width = 650  # Largeur maximale souhaitée
-        max_height = 450  # Hauteur maximale souhaitée
+        # Dessiner des rectangles rouges autour des mots non correspondants
+        ocr.dessiner_rectangles(image_produit, positions_mots, ocr.extraire_mots_et_chiffres(texte_produit), scores)
+        ocr.dessiner_rectangles(image_etiquette, positions_mots, ocr.extraire_mots_et_chiffres(texte_produit), scores)
 
-        # Convertissez les images binaires de type numpy.ndarray en QImage
-        for binary_image, label in image_label_pairs:
-            # Convertissez les images binaires en QImage
-            binary_qimage = QImage(binary_image.data, binary_image.shape[1], binary_image.shape[0],
-                                   binary_image.shape[1], QImage.Format.Format_Grayscale8)
+        # Créez une image de résultat en plaçant les deux images côte à côte
+        result_image = cv2.hconcat([image_produit, image_etiquette])
 
-            scaled_width = min(binary_qimage.width(), max_width)
-            scaled_height = min(binary_qimage.height(), max_height)
-            binary_qimage = binary_qimage.scaled(scaled_width, scaled_height)
+        # Affichez l'image résultante avec les deux images et les rectangles rouges
+        cv2.imshow("Images avec rectangles rouges", result_image)
 
-            # Créez des QPixmap à partir des images binaires redimensionnées
-            binary_pixmap = QPixmap.fromImage(binary_qimage)
+        # Enregistrez l'image résultante
+        cv2.imwrite("image_rectangles_rouges.png", result_image)
 
-            # Mettez à jour les QLabel avec les images binaires redimensionnées
-            label.setPixmap(binary_pixmap)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-            # Obtenez le chemin de fichier pour enregistrer l'image binaire
-            if label == self.label1:
-                original_image_path = "acquisition_image/etiquette_basler.png"
-                traitement_etiquette_instance.enregistrer_image(binary_image, "etiquette_basler_binarisee.png")
-            else:
-                original_image_path = "acquisition_image/produit_basler.png"
-                traitement_produit_instance.enregistrer_image(binary_image, "produit_basler_binarisee.png")
+        # Afficher les mots correspondants et leurs scores
+        print("\nMots correspondants entre les deux textes :")
+        for mot, correspondance, score in mots_correspondants:
+            print(f"Produit: {mot}, Étiquette: {correspondance} (Score: {score})")
 
-            # Enregistrez les images binaires dans le même dossier que les images initiales
-            # Utilisez le chemin de fichier de l'image originale
-            binary_pixmap.toImage().save(original_image_path)
+        # Display non-matching words and their positions in the product image
+        for i, (mot, correspondance, score) in enumerate(mots_correspondants):
+            if score < 100:
+                print(f"Non-matching word: {mot} (Score: {score})")
+                if positions_mots[i] is not None:
+                    print(f"Position in the product image: {positions_mots[i]}")
+                else:
+                    print("Position unknown")
 
-        def load_image(self, image_path):
-            # Chargez l'image depuis le chemin du fichier
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
-            if image is None:
-                raise Exception(f"Impossible de charger l'image depuis {image_path}")
-
-            return image'''
+    def traitement_plus_ocm(self):
+        self.traitement_images()
+        self.ocr()
