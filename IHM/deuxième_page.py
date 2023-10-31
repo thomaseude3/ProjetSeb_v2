@@ -2,22 +2,23 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtGui import QImage
-from traitement_image.binarisation import ImageProcessor
+from traitement import traitement_etiquette, traitement_produit
 import os
 from PIL import Image
+import cv2
+
 
 class ImageReviewPage(QDialog):
     def __init__(self, image1_path, image2_path):
         super().__init__()
 
-        image1_path="acquisition_image/etiquette_basler.png"
-        image2_path="acquisition_image/produit_basler.png"
+        image1_path = "acquisition_image/etiquette_basler.png"
+        image2_path = "acquisition_image/produit_basler.png"
 
+        # image1_path = "acquisition_image/image_etiquette.png"
+        # image2_path = "acquisition_image/image_produit.png"
 
-        #image1_path = "acquisition_image/image_etiquette.png"
-        #image2_path = "acquisition_image/image_produit.png"
-
-        self.setGeometry(100,100,1200,600)
+        self.setGeometry(100, 100, 1200, 600)
         self.setWindowTitle("Examen des images")
 
         layout = QVBoxLayout()
@@ -56,6 +57,7 @@ class ImageReviewPage(QDialog):
 
         # Utilisez le signal showEvent pour obtenir la taille de la fenêtre une fois affichée
         self.showEvent = self.on_show
+
     def on_show(self, event):
         # Obtenez la taille de la fenêtre une fois qu'elle est affichée
         window_size = self.size()
@@ -63,8 +65,10 @@ class ImageReviewPage(QDialog):
         screen_height = window_size.height()
 
         # Redimensionnez les images pour qu'elles correspondent à la taille de la fenêtre
-        scaled_pixmap1 = self.pixmap1.scaled(screen_width // 2, screen_height, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
-        scaled_pixmap2 = self.pixmap2.scaled(screen_width // 2, screen_height, aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+        scaled_pixmap1 = self.pixmap1.scaled(screen_width // 2, screen_height,
+                                             aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+        scaled_pixmap2 = self.pixmap2.scaled(screen_width // 2, screen_height,
+                                             aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
 
         # Affichez les images dans les QLabel
         self.label1.setPixmap(scaled_pixmap1)
@@ -72,21 +76,32 @@ class ImageReviewPage(QDialog):
 
     def traitement_images(self):
 
-        #image1_path = "acquisition_image/image_etiquette.png"
-        #image2_path = "acquisition_image/image_produit.png"
+        # image1_path = "acquisition_image/image_etiquette.png"
+        # image2_path = "acquisition_image/image_produit.png"
 
         image1_path = "acquisition_image/etiquette_basler.png"
         image2_path = "acquisition_image/produit_basler.png"
 
-        image_processor = ImageProcessor()
+        image1 = cv2.imread(image1_path)
+        image2 = cv2.imread(image2_path)
 
-        binary_image1 = image_processor.binarize_image(image1_path)
-        binary_image2 = image_processor.binarize_image(image2_path)
+        traitement_etiquette_instance = traitement_etiquette()
+        traitement_produit_instance = traitement_produit()
 
-        cleaned_binary_image1 = image_processor.remove_noise(binary_image1)
-        cleaned_binary_image2 = image_processor.remove_noise(binary_image2)
+        cleaned_binary_image1 = traitement_etiquette_instance.pre_traitement(image1)
+        cleaned_binary_image2 = traitement_produit_instance.pre_traitement(image2)
 
-        image_label_pairs = [(cleaned_binary_image1, self.label1),
+        binary_image1 = traitement_etiquette_instance.binariser_image(cleaned_binary_image1)
+        binary_image2 = traitement_produit_instance.binariser_image(cleaned_binary_image2)
+
+        traitement_etiquette_instance.enregistrer_image(binary_image1, 'etiquette_basler_binarisee.png')
+        traitement_etiquette_instance.enregistrer_image(binary_image2, 'produit_basler_binarise.png')
+
+
+
+
+
+        '''image_label_pairs = [(cleaned_binary_image1, self.label1),
                              (cleaned_binary_image2, self.label2)]
 
         # Redimensionnez les images binaires pour qu'elles soient visibles
@@ -99,11 +114,9 @@ class ImageReviewPage(QDialog):
             binary_qimage = QImage(binary_image.data, binary_image.shape[1], binary_image.shape[0],
                                    binary_image.shape[1], QImage.Format.Format_Grayscale8)
 
-
             scaled_width = min(binary_qimage.width(), max_width)
             scaled_height = min(binary_qimage.height(), max_height)
             binary_qimage = binary_qimage.scaled(scaled_width, scaled_height)
-
 
             # Créez des QPixmap à partir des images binaires redimensionnées
             binary_pixmap = QPixmap.fromImage(binary_qimage)
@@ -113,11 +126,21 @@ class ImageReviewPage(QDialog):
 
             # Obtenez le chemin de fichier pour enregistrer l'image binaire
             if label == self.label1:
-                original_image_path = "acquisition_image/image_etiquette.png"
+                original_image_path = "acquisition_image/etiquette_basler.png"
+                traitement_etiquette_instance.enregistrer_image(binary_image, "etiquette_basler_binarisee.png")
             else:
-                original_image_path = "acquisition_image/image_produit.png"
-            output_image_path = os.path.splitext(original_image_path)[0] + "_binarized.png"
+                original_image_path = "acquisition_image/produit_basler.png"
+                traitement_produit_instance.enregistrer_image(binary_image, "produit_basler_binarisee.png")
 
             # Enregistrez les images binaires dans le même dossier que les images initiales
-            binary_pixmap.toImage().save(output_image_path)
-        
+            # Utilisez le chemin de fichier de l'image originale
+            binary_pixmap.toImage().save(original_image_path)
+
+        def load_image(self, image_path):
+            # Chargez l'image depuis le chemin du fichier
+            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+            if image is None:
+                raise Exception(f"Impossible de charger l'image depuis {image_path}")
+
+            return image'''
