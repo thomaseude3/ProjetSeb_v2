@@ -120,19 +120,10 @@ class ImageReviewPage(QDialog):
 
         # Dessiner des rectangles rouges autour des mots non correspondants
         ocr.dessiner_rectangles(image_produit, positions_mots, ocr.extraire_mots_et_chiffres(texte_produit), scores)
-        ocr.dessiner_rectangles(image_etiquette, positions_mots, ocr.extraire_mots_et_chiffres(texte_produit), scores)
 
-        # Créez une image de résultat en plaçant les deux images côte à côte
-        result_image = cv2.hconcat([image_produit, image_etiquette])
-
-        # Affichez l'image résultante avec les deux images et les rectangles rouges
-        cv2.imshow("Images avec rectangles rouges", result_image)
-
+        cv2.imshow("Image du produit avec rectangles rouges", image_produit)
         # Enregistrez l'image résultante
-        cv2.imwrite("image_rectangles_rouges.png", result_image)
-
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        cv2.imwrite("image_rectangles_rouges.png", image_produit)
 
         # Afficher les mots correspondants et leurs scores
         print("\nMots correspondants entre les deux textes :")
