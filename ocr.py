@@ -56,53 +56,11 @@ class ocr:
 
         return mots_correspondants, scores
 
-    # Comparer les mots extraits
-"""    mots_correspondants, scores = comparer_mots(texte_produit, texte_etiquette)"""
-
-"""    # Afficher les textes extraits
-    print("Texte extrait de l'image du produit :")
-    print(texte_produit)
-    print("\nTexte extrait de l'image de l'étiquette :")
-    print(texte_etiquette)"""
-
-"""    # Localiser les positions des mots non correspondants dans l'image du produit
-    positions_mots = localiser_positions_mots(image_produit, extraire_mots_et_chiffres(texte_produit))
-    
-    # Dessiner des rectangles rouges autour des mots non correspondants
-    dessiner_rectangles(image_produit, positions_mots, extraire_mots_et_chiffres(texte_produit), scores)
-    
-    # Afficher les résultats
-    cv2.imshow("Image du produit avec rectangles rouges", image_produit)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    
-    # Afficher les mots correspondants et leurs scores
-    print("\nMots correspondants entre les deux textes :")
-    for mot, correspondance, score in mots_correspondants:
-        print(f"Produit: {mot}, Étiquette: {correspondance} (Score: {score})")
-    
-    # Display non-matching words and their positions in the product image
-    for i, (mot, correspondance, score) in enumerate(mots_correspondants):
-        if score < 100:
-            print(f"Non-matching word: {mot} (Score: {score})")
-            if positions_mots[i] is not None:
-                print(f"Position in the product image: {positions_mots[i]}")
-            else:
-                print("Position unknown")"""
-
-'''    # Fonction pour enregistrer l'image avec les rectangles'''
-"""   def enregistrer_image_rectangles(image, positions, nom_fichier):
+    """Fonction pour enregistrer l'image avec les rectangles
+  def enregistrer_image_rectangles(image, positions, nom_fichier):
         for position in positions:
             if position is not None:
                 x, y, w, h = position
                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
         cv2.imwrite(nom_fichier, image)"""
-
-    # Charger les images
-"""    image_produit = cv2.imread("acquisition_image/produit_basler_binarise.png")
-    image_etiquette = cv2.imread("acquisition_image/etiquette_basler_binarisee.png")
-
-    # Utiliser pytesseract pour extraire le texte des images
-    texte_produit = pytesseract.image_to_string(image_produit)
-    texte_etiquette = pytesseract.image_to_string(image_etiquette)"""
