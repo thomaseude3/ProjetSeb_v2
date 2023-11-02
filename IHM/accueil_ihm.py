@@ -3,6 +3,13 @@ from PyQt6.QtWidgets import QWidget, QPushButton, QVBoxLayout, QApplication
 import sys
 from acquisition_image.capture_image import ImageCapture
 from IHM.deuxième_page import ImageReviewPage
+from IHM.troisième_page import ImageDifferencePage
+
+
+def show_difference_page(image_path, positions, scores, different_words):
+    difference_page = ImageDifferencePage(image_path, positions, scores, different_words)
+    difference_page.exec()
+
 
 class ImageCaptureApp(QWidget):
     def __init__(self):
@@ -17,6 +24,7 @@ class ImageCaptureApp(QWidget):
         self.capture_product_button = QPushButton("Capturer le produit")
         self.capture_product_button.clicked.connect(self.start_countdown_product)
 
+        # Pour organiser les boutons verticalement
         layout = QVBoxLayout()
         layout.addWidget(self.capture_label_button)
         layout.addWidget(self.capture_product_button)
@@ -46,7 +54,7 @@ class ImageCaptureApp(QWidget):
             self.capture_label_button.setText(f"Prise d'image dans {self.countdown_label}s")
         else:
             self.timer_label.stop()
-            self.capture_label_button.setText("Autre prise d'image")
+            self.capture_label_button.setText("Autre prise d'image de l'étiquette")
             self.image_capture.basler_etiquette()
             """self.capture_label()"""
 
@@ -56,15 +64,25 @@ class ImageCaptureApp(QWidget):
             self.capture_product_button.setText(f"Prise d'image dans {self.countdown_product}s")
         else:
             self.timer_product.stop()
-            self.capture_product_button.setText("Autre prise d'image")
+            self.capture_product_button.setText("Autre prise d'image du produit")
             self.image_capture.basler_produit()
             """self.capture_product()"""
-
-    def capture_label(self):
-        self.image_capture.capture_etiquette()
-    def capture_product(self):
-        self.image_capture.capture_gravure()
 
     def show_image_review_page(self, image1, image2):
         review_page = ImageReviewPage(image1, image2)
         review_page.exec()
+        # Ici, vous pouvez ajouter un code pour revenir à la première page après la fermeture de la deuxième page
+        if review_page.result() == QDialog.DialogCode.Accepted:
+            # Si l'utilisateur a accepté, vous pouvez revenir à la première page
+            self.show()
+
+
+"""    def show_difference_page(image_path, positions, scores, different_words):
+        difference_page = ImageDifferencePage(image_path, positions, scores, different_words)
+        difference_page.exec()"""
+
+"""    ('    def capture_label(self):\n'
+     '            self.image_capture.capture_etiquette()\n'
+     '\n'
+     '        def capture_product(self):\n'
+     '            self.image_capture.capture_gravure()')"""

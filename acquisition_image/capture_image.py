@@ -61,9 +61,21 @@ class ImageCapture:
             # Ajoutez l'impression de la forme de l'image
             print("Shape de l'image :", image.shape)
 
+            height, width = image.shape
+            center_x = width // 2
+            center_y = height // 2
+            crop_size = 1100  # Taille du rectangle central en pixels (ajustez selon vos besoins)
+
+            # Calculez les coordonnées du coin supérieur gauche du rectangle
+            top_left_x = center_x - (crop_size // 2)
+            top_left_y = center_y - (crop_size // 2)
+
+            # Recadrez l'image au milieu
+            cropped_image = image[top_left_y:top_left_y + crop_size, top_left_x:top_left_x + crop_size]
+
             # Enregistrez l'image sous format PNG en utilisant OpenCV
             image_path = os.path.join(self.image_folder, "etiquette_basler.png")
-            cv2.imwrite(image_path, image)
+            cv2.imwrite(image_path, cropped_image)
 
             self.label_captured = True
 
@@ -92,9 +104,22 @@ class ImageCapture:
             # Ajoutez l'impression de la forme de l'image
             print("Shape de l'image :", image.shape)
 
+
+            height, width = image.shape
+            center_x = width // 2
+            center_y = height // 2
+            crop_size = 1000  # Taille du rectangle central en pixels (ajustez selon vos besoins)
+
+            # Calculez les coordonnées du coin supérieur gauche du rectangle
+            top_left_x = center_x - (crop_size // 2)
+            top_left_y = center_y - (crop_size // 2)
+
+            # Recadrez l'image au milieu
+            cropped_image = image[top_left_y:top_left_y + crop_size, top_left_x:top_left_x + crop_size]
+
             # Enregistrez l'image sous format PNG en utilisant OpenCV
             image_path = os.path.join(self.image_folder, "produit_basler.png")
-            cv2.imwrite(image_path, image)
+            cv2.imwrite(image_path, cropped_image)
 
             self.product_captured = True
 

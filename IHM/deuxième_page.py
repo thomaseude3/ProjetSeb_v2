@@ -1,3 +1,5 @@
+from typing import List, Tuple, Any
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QWidget
 from PyQt6.QtGui import QPixmap
@@ -10,6 +12,7 @@ import cv2
 import pytesseract
 from fuzzywuzzy import fuzz, process
 import re
+from IHM.troisième_page import ImageDifferencePage
 
 
 class ImageReviewPage(QDialog):
@@ -57,7 +60,8 @@ class ImageReviewPage(QDialog):
 
         self.setLayout(layout)
 
-        accept_button.clicked.connect(self.traitement_plus_ocm)
+        accept_button.clicked.connect(self.traitement_plus_ocr)
+        decline_button.clicked.connect(self.retour_premiere_page)
 
         # Utilisez le signal showEvent pour obtenir la taille de la fenêtre une fois affichée
         self.showEvent = self.on_show
@@ -101,6 +105,7 @@ class ImageReviewPage(QDialog):
         traitement_etiquette_instance.enregistrer_image(binary_image1, 'etiquette_basler_binarisee.png')
         traitement_etiquette_instance.enregistrer_image(binary_image2, 'produit_basler_binarise.png')
 
+    @property
     def ocr(self):
         image_produit = cv2.imread("acquisition_image/produit_basler_binarise.png")
         image_etiquette = cv2.imread("acquisition_image/etiquette_basler_binarisee.png")
@@ -109,6 +114,9 @@ class ImageReviewPage(QDialog):
         texte_etiquette = pytesseract.image_to_string(image_etiquette)
 
         mots_correspondants, scores = ocr.comparer_mots(texte_produit, texte_etiquette)
+        # Créez une liste pour stocker les mots non correspondants et leurs scores
+        mots_non_correspondants=[]
+
 
         print("Texte extrait de l'image du produit :")
         print(texte_produit)
@@ -121,7 +129,7 @@ class ImageReviewPage(QDialog):
         # Dessiner des rectangles rouges autour des mots non correspondants
         ocr.dessiner_rectangles(image_produit, positions_mots, ocr.extraire_mots_et_chiffres(texte_produit), scores)
 
-        cv2.imshow("Image du produit avec rectangles rouges", image_produit)
+        #cv2.imshow("Image du produit avec rectangles rouges", image_produit)
         # Enregistrez l'image résultante
         cv2.imwrite("image_rectangles_rouges.png", image_produit)
 
@@ -129,16 +137,26 @@ class ImageReviewPage(QDialog):
         print("\nMots correspondants entre les deux textes :")
         for mot, correspondance, score in mots_correspondants:
             print(f"Produit: {mot}, Étiquette: {correspondance} (Score: {score})")
+            if score < 100:
+                # Ajoutez les mots non correspondants à la liste
+                mots_non_correspondants.append((mot, correspondance, score))
+            print(mots_non_correspondants)
 
         # Display non-matching words and their positions in the product image
-        for i, (mot, correspondance, score) in enumerate(mots_correspondants):
+        """for i, (mot, correspondance, score) in enumerate(mots_correspondants):
             if score < 100:
                 print(f"Non-matching word: {mot} (Score: {score})")
                 if positions_mots[i] is not None:
                     print(f"Position in the product image: {positions_mots[i]}")
                 else:
-                    print("Position unknown")
+                    print("Position unknown")"""
+        return mots_non_correspondants
 
-    def traitement_plus_ocm(self):
+    def retour_premiere_page(self):
+        self.accept()  # Ferme la boîte de dialogue
+
+    def traitement_plus_ocr(self):
         self.traitement_images()
-        self.ocr()
+        mots_non_correspondants = self.ocr
+        image_difference_page = ImageDifferencePage("image_rectangles_rouges.png", mots_non_correspondants)
+        image_difference_page.exec()
