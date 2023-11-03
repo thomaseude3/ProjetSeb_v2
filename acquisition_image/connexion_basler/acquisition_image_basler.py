@@ -28,7 +28,7 @@ if grab.GrabSucceeded():
     cropped_image = image[top_left_y:top_left_y + crop_size, top_left_x:top_left_x + crop_size]
 
     # Enregistrez l'image recadrée sous format PNG en utilisant OpenCV
-    image_path = "image_test.png"
+    image_path = "/Users/thomaseude/Desktop/Cholo/image_test.png"
     cv2.imwrite(image_path, cropped_image)
 
 else:
