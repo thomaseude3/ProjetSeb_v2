@@ -107,7 +107,7 @@ class ImageReviewPage(QDialog):
 
     @property
     def ocr(self):
-        image_produit = cv2.imread("acquisition_image/produit_basler_binarise.png")
+        image_produit = cv2.imread("acquisition_image/produit_basler_binarisee.png")
         image_etiquette = cv2.imread("acquisition_image/etiquette_basler_binarisee.png")
 
         texte_produit = pytesseract.image_to_string(image_produit)

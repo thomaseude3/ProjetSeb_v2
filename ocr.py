@@ -55,12 +55,3 @@ class ocr:
                 mots_correspondants.append((mot1, correspondance[0], score))
 
         return mots_correspondants, scores
-
-    """Fonction pour enregistrer l'image avec les rectangles
-  def enregistrer_image_rectangles(image, positions, nom_fichier):
-        for position in positions:
-            if position is not None:
-                x, y, w, h = position
-                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-        cv2.imwrite(nom_fichier, image)"""
